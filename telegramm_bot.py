@@ -126,7 +126,7 @@ def remove_database(message):
 @bot.message_handler(commands=['cr_db'])
 def creat_database(message):
     create_database()
-
+    logging.info('Дата база создана.')
 
 @bot.message_handler(commands=['tts'])
 def tts_handler(message):
@@ -154,7 +154,6 @@ def tts(message):
         full_message = [text, 'user', 0, len(text), 0]
 
         if status:
-            logging.info(full_message)
             add_message(user_id, full_message)
             bot.send_voice(user_id, content)
         else:
@@ -193,7 +192,6 @@ def stt(message):
 
         full_message = [text, 'user', 0, 0, blocks]
         if status:
-            logging.info(full_message)
             add_message(user_id, full_message)
             bot.send_message(user_id, text, reply_to_message_id=message.id)
         else:
