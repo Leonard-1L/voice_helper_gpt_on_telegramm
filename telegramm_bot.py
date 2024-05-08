@@ -123,6 +123,11 @@ def remove_database(message):
     bot.send_message(message.from_user.id, f"База удалена, потрачено токенов: {tokens}.")
 
 
+@bot.message_handler(commands=['cr_db'])
+def creat_database(message):
+    create_database()
+
+
 @bot.message_handler(commands=['tts'])
 def tts_handler(message):
     user_id = message.from_user.id
