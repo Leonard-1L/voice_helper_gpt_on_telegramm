@@ -123,6 +123,83 @@ def remove_database(message):
     bot.send_message(message.from_user.id, f"База удалена, потрачено токенов: {tokens}.")
 
 
+@bot.message_handler(commands=['tts'])
+def tts_handler(message):
+    user_id = message.from_user.id
+    bot.send_message(user_id, 'Отправь следующим сообщением текст, чтобы я его озвучил!')
+    bot.register_next_step_handler(message, tts)
+
+
+def tts(message):
+    user_id = message.chat.id
+    text = message.text
+    try:
+        if message and message.content_type != 'text':
+            bot.send_message(user_id, 'Отправь текстовое сообщение')
+            return
+
+        status, error_message = is_tts_symbol_limit(user_id, text)
+        if error_message:
+            bot.send_message(user_id, error_message)
+            return
+
+        logging.info(f"Запрос от {user_id} проверки режима TTS")
+        status, content = text_to_voice(text)
+
+        full_message = [text, 'user', 0, len(text), 0]
+
+        if status:
+            logging.info(full_message)
+            add_message(user_id, full_message)
+            bot.send_voice(user_id, content)
+        else:
+            bot.send_message(user_id, content)
+    except Exception as e:
+        logging.error(e)
+        bot.send_message(user_id,
+                         "Не получилось перевест текст в аудио. Разрабочик уже в пути.")
+
+
+@bot.message_handler(commands=['stt'])
+def stt_handler(message):
+    bot.send_message(message.chat.id, "Отправь голосовое сообщение: ")
+
+    bot.register_next_step_handler(message, stt)
+
+
+def stt(message):
+    try:
+        user_id = message.from_user.id
+
+        if not message.voice:
+            bot.send_message(user_id, 'Отправь голосовое сообщение')
+            return
+
+        status, out = is_stt_block_limit(user_id, message.voice.duration)
+        if out:
+            bot.send_message(user_id, out)
+            return
+
+        file_id = message.voice.file_id
+        file_info = bot.get_file(file_id)
+        file = bot.download_file(file_info.file_path)
+
+        status, text = speech_to_text(file)
+
+        full_message = [text, 'user', 0, 0, status]
+        if status:
+            logging.info(full_message)
+            add_message(user_id, full_message)
+            bot.send_message(user_id, text, reply_to_message_id=message.id)
+        else:
+            bot.send_message(user_id, text)
+
+    except Exception as e:
+        logging.error(e)
+        bot.send_message(message.from_user.id, "Не получилось перевести аудио. Попробуй еще раз.")
+        return False, ""
+
+
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     try:

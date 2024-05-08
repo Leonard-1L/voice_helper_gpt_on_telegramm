@@ -33,7 +33,7 @@ def is_stt_block_limit(user_id, duration):
     blocks_now = (duration // 15) + 1
     blocks = count_all_limits(user_id, 'stt_blocks') + blocks_now
     if blocks > MAX_USER_STT_BLOCKS or blocks_now > 2:
-        return blocks, "Было затрачено слишком много аудио сообщений."
+        return blocks, "Аудио сообщение слишком долгое, или вы потратили весь запас голосовых сообщений."
     return blocks, None
 
 
