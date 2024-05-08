@@ -175,7 +175,7 @@ def stt(message):
             bot.send_message(user_id, 'Отправь голосовое сообщение')
             return
 
-        status, out = is_stt_block_limit(user_id, message.voice.duration)
+        blocks, out = is_stt_block_limit(user_id, message.voice.duration)
         if out:
             bot.send_message(user_id, out)
             return
@@ -186,7 +186,7 @@ def stt(message):
 
         status, text = speech_to_text(file)
 
-        full_message = [text, 'user', 0, 0, status]
+        full_message = [text, 'user', 0, 0, blocks]
         if status:
             logging.info(full_message)
             add_message(user_id, full_message)
